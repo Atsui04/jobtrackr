@@ -13,7 +13,7 @@ export type Job = {
   appliedDate: string | null;
   link: string | null;
   notes: string | null;
-  createdAt: string;
+  created_at: string;
 };
 
-export type NewJob = Omit<Job, "id" | "createdAt">;
+export type NewJob = Omit<Job, "id" | "created_at">;
