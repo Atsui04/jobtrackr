@@ -1,9 +1,20 @@
-const App = () => {
+import { useEffect } from "react";
+import { supabase } from "./lib/supabase";
+
+function App() {
+  useEffect(() => {
+    async function testConnection() {
+      const { data, error } = await supabase.from("jobs").select("*");
+      console.log("data:", data, "error:", error);
+    }
+    testConnection();
+  }, []);
+
   return (
     <div>
-      <p className="text-red-950 bg-red-200 text-4xl">Hello, World!</p>
+      <p>Hello, World!</p>
     </div>
   );
-};
+}
 
 export default App;
