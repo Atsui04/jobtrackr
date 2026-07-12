@@ -1,22 +1,30 @@
 import { useEffect, useState } from "react";
-import { getJobs } from "./lib/jobs";
-import type { Job } from "./types/job";
+import JobForm from "./components/JobForm";
+import type { Job, NewJob } from "./types/job";
+import { addJob, getJobs } from "./lib/jobs";
 
 function App() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
 
   useEffect(() => {
     getJobs().then(setJobs).catch(console.error);
   }, []);
 
+  function handleClose() {
+    setIsModalOpen((prev) => !prev);
+  }
+
+  async function handleAddJob(job: NewJob) {
+    const created = await addJob(job);
+    setJobs((prev) => [created, ...prev]);
+  }
+
   return (
-    <ul>
-      {jobs.map((job) => (
-        <li key={job.id}>
-          {job.company} — {job.position} ({job.status})
-        </li>
-      ))}
-    </ul>
+    <main className="h-dvh">
+      <button onClick={handleClose}>+ New Job</button>
+      {isModalOpen && <JobForm onClose={handleClose} onAddJob={handleAddJob} />}
+    </main>
   );
 }
 

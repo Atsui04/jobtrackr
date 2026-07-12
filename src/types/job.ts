@@ -10,7 +10,7 @@ export type Job = {
   company: string;
   position: string;
   status: JobStatus;
-  appliedDate: string | null;
+  applied_date: string | null;
   link: string | null;
   notes: string | null;
   created_at: string;
