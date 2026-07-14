@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import JobForm from "./components/JobForm";
-import type { Job, NewJob } from "./types/job";
-import { addJob, getJobs } from "./lib/jobs";
+import type { Job, JobStatus, NewJob } from "./types/job";
+import { addJob, getJobs, updateJob } from "./lib/jobs";
 import KanbanBoard from "./components/KanbanBoard";
 
 function App() {
@@ -21,6 +21,20 @@ function App() {
     setJobs((prev) => [created, ...prev]);
   }
 
+  async function handleMoveJob(jobId: string, newStatus: JobStatus) {
+    const previousJobs = jobs;
+
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)),
+    );
+
+    try {
+      await updateJob(jobId, newStatus);
+    } catch {
+      setJobs(previousJobs);
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto min-h-dvh flex flex-col px-4 md:px-8">
       <header className="flex justify-between py-4 px-6 items-center">
@@ -34,7 +48,7 @@ function App() {
       </header>
 
       <main>
-        <KanbanBoard jobs={jobs} />
+        <KanbanBoard jobs={jobs} onMoveJob={handleMoveJob} />
         {isModalOpen && (
           <JobForm onClose={handleClose} onAddJob={handleAddJob} />
         )}
