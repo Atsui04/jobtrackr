@@ -1,3 +1,4 @@
+import { useDraggable } from "@dnd-kit/react";
 import type { Job } from "../types/job";
 
 interface JobCardProps {
@@ -5,8 +6,17 @@ interface JobCardProps {
 }
 
 function JobCard({ job }: JobCardProps) {
+  const { ref, isDragging } = useDraggable({
+    id: job.id,
+  });
+
   return (
-    <div className="bg-paper rounded-lg p-3.5 transition-all cursor-pointer flex flex-col gap-1 hover:bg-paper/70">
+    <div
+      ref={ref}
+      className={`bg-paper rounded-lg p-3.5 transition-all cursor-pointer flex flex-col gap-1 hover:bg-paper/70 ${
+        isDragging ? "shadow-lg scale-105 rotate-1 opacity-90" : ""
+      }`}
+    >
       <h3 className="text-sm font-semibold text-ink leading-snug">
         {job.company}
       </h3>
