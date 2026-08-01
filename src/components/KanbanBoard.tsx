@@ -6,9 +6,10 @@ import KanbanColumn from "./KanbanColumn";
 interface KanbanBoardProps {
   jobs: Job[];
   onMoveJob: (jobId: string, newStatus: JobStatus) => void;
+  onDeleteJob: (jobId: string) => void;
 }
 
-function KanbanBoard({ jobs, onMoveJob }: KanbanBoardProps) {
+function KanbanBoard({ jobs, onMoveJob, onDeleteJob }: KanbanBoardProps) {
   return (
     <DragDropProvider
       onDragEnd={(event) => {
@@ -22,13 +23,14 @@ function KanbanBoard({ jobs, onMoveJob }: KanbanBoardProps) {
         onMoveJob(jobId as string, newStatus as JobStatus);
       }}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-start w-full mt-6">
+      <div className="mt-6 grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-2 md:grid-cols-5">
         {STATUSES.map(({ value, label }) => (
           <KanbanColumn
             key={value}
             status={value}
             label={label}
             jobs={jobs.filter((j) => j.status === value)}
+            onDeleteJob={onDeleteJob}
           />
         ))}
       </div>
