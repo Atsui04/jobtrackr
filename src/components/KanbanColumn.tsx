@@ -7,9 +7,10 @@ interface KanbanColumnProps {
   status: JobStatus;
   label: string;
   jobs: Job[];
+  onDeleteJob: (jobId: string) => void;
 }
 
-function KanbanColumn({ status, label, jobs }: KanbanColumnProps) {
+function KanbanColumn({ status, label, jobs, onDeleteJob }: KanbanColumnProps) {
   const { ref } = useDroppable({
     id: status,
   });
@@ -17,26 +18,26 @@ function KanbanColumn({ status, label, jobs }: KanbanColumnProps) {
   return (
     <div
       ref={ref}
-      className="flex flex-col bg-white rounded-xl shadow-sm border border-ink/10 overflow-hidden min-w-50"
+      className="border-ink/10 flex min-w-50 flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
     >
       <div className={`h-1.5 w-full ${STATUS_STRIPE[status]}`} />
-      <div className="p-4 flex flex-col flex-1">
-        <div className="flex justify-between items-center text-xs font-semibold text-ink/70 mb-4">
+      <div className="flex flex-1 flex-col p-4">
+        <div className="text-ink/70 mb-4 flex items-center justify-between text-xs font-semibold">
           <h2>{label}</h2>
           {jobs.length > 0 && (
-            <span className="bg-paper text-ink/60 px-2 py-0.5 rounded-full text-[10px]">
+            <span className="bg-paper text-ink/60 rounded-full px-2 py-0.5 text-[10px]">
               {jobs.length}
             </span>
           )}
         </div>
         {jobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border-2 border-dashed border-ink/10 rounded-lg py-8 px-2 flex-1">
-            <p className="text-xs text-ink/40 text-center">No jobs yet</p>
+          <div className="border-ink/10 flex flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed px-2 py-8">
+            <p className="text-ink/40 text-center text-xs">No jobs yet</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
             {jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard key={job.id} job={job} onDeleteJob={onDeleteJob} />
             ))}
           </div>
         )}

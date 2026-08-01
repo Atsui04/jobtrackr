@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { SubmitEvent } from "react";
-import closeIcon from "../assets/icons/cancel-svgrepo-com.svg";
 import type { NewJob } from "../types/job";
+
+import { X } from "lucide-react";
 
 interface JobFormProps {
   onClose: () => void;
@@ -57,24 +58,21 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
       ref={dialogRef}
       onClose={handleNativeClose}
       onClick={(e) => e.target === dialogRef.current && requestClose()}
-      className="fixed inset-0 m-auto bg-white rounded-xl p-6 backdrop:bg-black/50 border-none outline-none shadow-xl max-w-md w-full"
+      className="fixed inset-0 m-auto w-full max-w-md rounded-xl border-none bg-white p-6 shadow-xl outline-none backdrop:bg-black/50"
     >
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4 font-sans text-ink"
+        className="text-ink flex flex-col gap-4 font-sans"
       >
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-display">Add Job</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg">Add Job</h2>
           <button
+            aria-label="Close"
             type="button"
             onClick={requestClose}
-            className="cursor-pointer focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 rounded-full outline-none"
+            className="focus-visible:ring-signal cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
-            <img
-              src={closeIcon}
-              alt="Close dialog button"
-              className="w-4 h-4"
-            />
+            <X size={16} aria-hidden />
           </button>
         </div>
         <div className="flex flex-col gap-1 font-light">
@@ -88,7 +86,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="company"
             id="company"
             placeholder="Google"
-            className="py-2 px-3 bg-paper rounded-md outline-none focus:ring-2 focus:ring-signal"
+            className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -101,7 +99,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="position"
             id="position"
             placeholder="Frontend developer"
-            className="py-2 px-3 bg-paper rounded-md outline-none focus:ring-2 focus:ring-signal"
+            className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -113,7 +111,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="link"
             id="link"
             placeholder="https://..."
-            className="py-2 px-3 bg-paper rounded-md outline-none focus:ring-2 focus:ring-signal"
+            className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -124,24 +122,24 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="notes"
             id="notes"
             placeholder="Recruiter contacts, details..."
-            className="py-2 px-3 bg-paper rounded-md outline-none focus:ring-2 focus:ring-signal"
+            className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           ></textarea>
         </div>
 
         {error && <p className="text-wine text-xs">{error}</p>}
 
-        <div className="flex items-center gap-6 justify-end">
+        <div className="flex items-center justify-end gap-6">
           <button
             onClick={requestClose}
             type="button"
-            className="py-2 px-4 font-light cursor-pointer rounded-lg focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 outline-none"
+            className="focus-visible:ring-signal cursor-pointer rounded-lg px-4 py-2 font-light outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="py-2 px-4 text-paper bg-signal rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 outline-none"
+            className="text-paper bg-signal focus-visible:ring-signal cursor-pointer rounded-lg px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {isSubmitting ? "Adding..." : "Add"}
           </button>

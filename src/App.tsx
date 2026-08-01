@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import JobForm from "./components/JobForm";
 import type { Job, JobStatus, NewJob } from "./types/job";
-import { addJob, getJobs, updateJob } from "./lib/jobs";
+import { addJob, deleteJob, getJobs, updateJob } from "./lib/jobs";
 import KanbanBoard from "./components/KanbanBoard";
 
 function App() {
@@ -25,30 +25,50 @@ function App() {
     const previousJobs = jobs;
 
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)),
+      prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
     );
 
     try {
       await updateJob(jobId, newStatus);
-    } catch {
+    } catch (err) {
       setJobs(previousJobs);
+      console.error(err);
+    }
+  }
+
+  async function handleDeleteJob(jobId: string) {
+    const isConfirmed = window.confirm("Delete this job application?");
+    if (!isConfirmed) return;
+
+    const previousJobs = jobs;
+    setJobs((jobs) => jobs.filter((job) => job.id !== jobId));
+
+    try {
+      await deleteJob(jobId);
+    } catch (err) {
+      setJobs(previousJobs);
+      console.error(err);
     }
   }
 
   return (
-    <div className="max-w-7xl mx-auto min-h-dvh flex flex-col px-4 md:px-8">
-      <header className="flex justify-between py-4 px-6 items-center">
-        <h1 className="font-display font-semibold text-xl">JobTrackr</h1>
+    <div className="mx-auto flex min-h-dvh max-w-7xl flex-col px-4 md:px-8">
+      <header className="flex items-center justify-between px-6 py-4">
+        <h1 className="font-display text-xl font-semibold">JobTrackr</h1>
         <button
           onClick={handleClose}
-          className="font-sans bg-signal text-white cursor-pointer py-2 px-4 rounded-xl hover:bg-signal/90 focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 outline-none transition-colors duration-200"
+          className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-4 py-2 font-sans text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           + New Job
         </button>
       </header>
 
       <main>
-        <KanbanBoard jobs={jobs} onMoveJob={handleMoveJob} />
+        <KanbanBoard
+          jobs={jobs}
+          onMoveJob={handleMoveJob}
+          onDeleteJob={handleDeleteJob}
+        />
         {isModalOpen && (
           <JobForm onClose={handleClose} onAddJob={handleAddJob} />
         )}
