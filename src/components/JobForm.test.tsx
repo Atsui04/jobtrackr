@@ -6,6 +6,7 @@ import JobForm from "./JobForm";
 describe("JobForm Component", () => {
   const mockOnClose = vi.fn();
   const mockOnAddJob = vi.fn().mockResolvedValue(undefined);
+  const mockOnEditJob = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -14,7 +15,13 @@ describe("JobForm Component", () => {
   it("should call onAddJob and close modal on valid submit data", async () => {
     const user = userEvent.setup();
 
-    render(<JobForm onAddJob={mockOnAddJob} onClose={mockOnClose} />);
+    render(
+      <JobForm
+        onAddJob={mockOnAddJob}
+        onClose={mockOnClose}
+        onEditJob={mockOnEditJob}
+      />
+    );
     const dialog = screen.getByRole("dialog", { hidden: true });
 
     const companyInput = screen.getByLabelText(/company/i);
@@ -35,7 +42,7 @@ describe("JobForm Component", () => {
         link: null,
         notes: null,
         applied_date: expect.any(String),
-      }),
+      })
     );
     expect(dialog).not.toHaveAttribute("open");
   });
@@ -43,7 +50,13 @@ describe("JobForm Component", () => {
   it("should not call onAddJob with invalid submit data", async () => {
     const user = userEvent.setup();
 
-    render(<JobForm onAddJob={mockOnAddJob} onClose={mockOnClose} />);
+    render(
+      <JobForm
+        onAddJob={mockOnAddJob}
+        onClose={mockOnClose}
+        onEditJob={mockOnEditJob}
+      />
+    );
 
     const companyInput = screen.getByLabelText(/company/i);
     const positionInput = screen.getByLabelText(/position/i);

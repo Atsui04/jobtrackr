@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import KanbanColumn from "./KanbanColumn";
 import { DragDropProvider } from "@dnd-kit/react";
 import type { Job } from "../types/job";
@@ -10,7 +10,15 @@ function renderColumn(ui: React.ReactNode) {
 
 describe("KanbanColumn component", () => {
   it("renders 'No jobs yet' when jobs array is empty", () => {
-    renderColumn(<KanbanColumn status="applied" label="Applied" jobs={[]} />);
+    renderColumn(
+      <KanbanColumn
+        status="applied"
+        label="Applied"
+        jobs={[]}
+        onDeleteJob={vi.fn()}
+        onCardClick={vi.fn()}
+      />
+    );
 
     expect(screen.getByText("No jobs yet")).toBeInTheDocument();
   });
@@ -50,7 +58,13 @@ describe("KanbanColumn component", () => {
     ];
 
     renderColumn(
-      <KanbanColumn status="applied" label="Applied" jobs={mockJobs} />,
+      <KanbanColumn
+        status="applied"
+        label="Applied"
+        jobs={mockJobs}
+        onDeleteJob={vi.fn()}
+        onCardClick={vi.fn()}
+      />
     );
 
     expect(screen.queryByText("No jobs yet")).not.toBeInTheDocument();
