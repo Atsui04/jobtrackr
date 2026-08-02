@@ -1,75 +1,89 @@
-# React + TypeScript + Vite
+# JobTrackr
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A kanban-style job application tracker for managing your job search — from application to offer.
 
-Currently, two official plugins are available:
+[![CI](https://github.com/Atsui04/jobtrackr/actions/workflows/ci.yml/badge.svg)](https://github.com/Atsui04/jobtrackr/actions/workflows/ci.yml)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+![JobTrackr screenshot](./screenshot.png)
 
-## React Compiler
+**[Live demo →](https://jobtrackr-nip0zc1v0-marks-projects-d14cc920.vercel.app/)**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- Kanban board with 5 statuses: Applied → Screening → Interview → Offer → Rejected
+- Drag-and-drop between columns to update application status
+- Full CRUD: add, edit, and delete job applications
+- Optimistic UI updates with rollback on network errors
+- Accessibility: full keyboard support, ARIA labels, native `<dialog>` focus trapping
+- Component tests covering the form, card, and column
+- CI pipeline: lint and tests run on every push/PR
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Category     | Technology                               |
+| ------------ | ---------------------------------------- |
+| Frontend     | React, TypeScript, Vite                  |
+| Styling      | Tailwind CSS v4                          |
+| Backend / DB | Supabase (Postgres + auto-generated API) |
+| Drag & Drop  | @dnd-kit/react                           |
+| Testing      | Vitest, React Testing Library            |
+| CI           | GitHub Actions                           |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Running locally
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+git clone https://github.com/Atsui04/jobtrackr.git
+cd jobtrackr
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Create a `.env` file in the project root:
 
 ```
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+```bash
+npm run dev
+```
+
+## Testing
+
+```bash
+npm run test
+```
+
+## Project structure
+
+```
+src/
+  components/
+    JobForm.tsx        # add/edit job modal
+    JobCard.tsx         # a single job card on the board
+    KanbanColumn.tsx     # a single status column
+    KanbanBoard.tsx       # dnd context + grouping by status
+  lib/
+    supabase.ts          # Supabase client setup
+    jobs.ts               # CRUD functions (getJobs, addJob, updateJob, deleteJob)
+  types/
+    job.ts                 # Job, NewJob, JobStatus types
+    modalState.ts           # ModalState type
+  utils/
+    constants.ts            # status list and color tokens
+```
+
+## Database
+
+A `jobs` table in Supabase with Row Level Security enabled. Schema:
+
+| Column         | Type                |
+| -------------- | ------------------- |
+| `id`           | `uuid`, primary key |
+| `company`      | `text`              |
+| `position`     | `text`              |
+| `status`       | `text`              |
+| `applied_date` | `date`              |
+| `link`         | `text`, nullable    |
+| `notes`        | `text`, nullable    |
+| `created_at`   | `timestamptz`       |
