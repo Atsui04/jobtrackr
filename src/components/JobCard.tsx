@@ -28,8 +28,11 @@ function JobCard({ job, onDeleteJob, onCardClick }: JobCardProps) {
         </h3>
         <button
           aria-label="Delete job"
-          onClick={() => onDeleteJob(job.id)}
-          className="text-ink/40 hover:text-wine pointer-events-none cursor-pointer opacity-0 transition-all duration-200 group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteJob(job.id);
+          }}
+          className="text-ink/40 hover:text-wine pointer-events-none cursor-pointer opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100 focus-visible:opacity-100"
         >
           <Trash2 size={16} aria-hidden />
         </button>
