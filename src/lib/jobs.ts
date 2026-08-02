@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Job, JobStatus, NewJob } from "../types/job";
+import type { Job, NewJob } from "../types/job";
 
 export async function getJobs(): Promise<Job[]> {
   const { data, error } = await supabase
@@ -22,8 +22,11 @@ export async function addJob(job: NewJob): Promise<Job> {
   return data;
 }
 
-export async function updateJob(id: string, status: JobStatus): Promise<void> {
-  const { error } = await supabase.from("jobs").update({ status }).eq("id", id);
+export async function updateJob(
+  id: string,
+  updates: Partial<Omit<Job, "id" | "created_at">>
+): Promise<void> {
+  const { error } = await supabase.from("jobs").update(updates).eq("id", id);
 
   if (error) throw error;
 }

@@ -7,10 +7,17 @@ interface KanbanColumnProps {
   status: JobStatus;
   label: string;
   jobs: Job[];
-  onDeleteJob: (jobId: string) => void;
+  onDeleteJob: (jobId: string) => Promise<void>;
+  onCardClick: (job: Job) => void;
 }
 
-function KanbanColumn({ status, label, jobs, onDeleteJob }: KanbanColumnProps) {
+function KanbanColumn({
+  status,
+  label,
+  jobs,
+  onDeleteJob,
+  onCardClick,
+}: KanbanColumnProps) {
   const { ref } = useDroppable({
     id: status,
   });
@@ -37,7 +44,12 @@ function KanbanColumn({ status, label, jobs, onDeleteJob }: KanbanColumnProps) {
         ) : (
           <div className="flex flex-col gap-2.5">
             {jobs.map((job) => (
-              <JobCard key={job.id} job={job} onDeleteJob={onDeleteJob} />
+              <JobCard
+                key={job.id}
+                job={job}
+                onDeleteJob={onDeleteJob}
+                onCardClick={onCardClick}
+              />
             ))}
           </div>
         )}

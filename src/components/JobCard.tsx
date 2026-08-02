@@ -5,10 +5,11 @@ import { Trash2 } from "lucide-react";
 
 interface JobCardProps {
   job: Job;
-  onDeleteJob: (jobId: string) => void;
+  onDeleteJob: (jobId: string) => Promise<void>;
+  onCardClick: (job: Job) => void;
 }
 
-function JobCard({ job, onDeleteJob }: JobCardProps) {
+function JobCard({ job, onDeleteJob, onCardClick }: JobCardProps) {
   const { ref, isDragging } = useDraggable({
     id: job.id,
   });
@@ -19,6 +20,7 @@ function JobCard({ job, onDeleteJob }: JobCardProps) {
       className={`group bg-paper hover:bg-paper/70 flex cursor-pointer flex-col gap-1 rounded-lg p-3.5 transition-all ${
         isDragging ? "scale-105 rotate-1 opacity-90 shadow-lg" : ""
       }`}
+      onClick={() => onCardClick(job)}
     >
       <div className="flex items-center justify-between">
         <h3 className="text-ink text-sm leading-snug font-semibold">
