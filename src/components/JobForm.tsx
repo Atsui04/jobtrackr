@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import type { SubmitEvent } from "react";
-import type { NewJob } from "../types/job";
+import type { Job, NewJob } from "../types/job";
 
 import { X } from "lucide-react";
 
 interface JobFormProps {
   onClose: () => void;
   onAddJob: (job: NewJob) => Promise<void>;
+  onEditJob: (
+    jobId: string,
+    updates: Partial<Omit<Job, "id" | "created_at">>
+  ) => Promise<void>;
+  initialData?: Job;
 }
 
-function JobForm({ onClose, onAddJob }: JobFormProps) {
+function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const companyInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,11 +37,9 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const newJob: NewJob = {
+    const values = {
       company: formData.get("company") as string,
       position: formData.get("position") as string,
-      status: "applied",
-      applied_date: new Date().toISOString().split("T")[0],
       link: (formData.get("link") as string) || null,
       notes: (formData.get("notes") as string) || null,
     };
@@ -44,10 +47,20 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
     try {
       setIsSubmitting(true);
       setError(null);
-      await onAddJob(newJob);
+
+      if (initialData) {
+        await onEditJob(initialData.id, values);
+      } else {
+        await onAddJob({
+          ...values,
+          status: "applied",
+          applied_date: new Date().toISOString().split("T")[0],
+        });
+      }
+
       requestClose();
     } catch {
-      setError("Failed to add the job opening. Please try again.");
+      setError("Failed to save the job opening. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -65,7 +78,9 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
         className="text-ink flex flex-col gap-4 font-sans"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg">Add Job</h2>
+          <h2 className="font-display text-lg">
+            {initialData ? "Edit Job" : "Add Job"}
+          </h2>
           <button
             aria-label="Close"
             type="button"
@@ -86,6 +101,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="company"
             id="company"
             placeholder="Google"
+            defaultValue={initialData?.company}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
@@ -99,6 +115,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="position"
             id="position"
             placeholder="Frontend developer"
+            defaultValue={initialData?.position}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
@@ -111,6 +128,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="link"
             id="link"
             placeholder="https://..."
+            defaultValue={initialData?.link ?? undefined}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
         </div>
@@ -122,6 +140,7 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             name="notes"
             id="notes"
             placeholder="Recruiter contacts, details..."
+            defaultValue={initialData?.notes ?? undefined}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           ></textarea>
         </div>
@@ -141,7 +160,13 @@ function JobForm({ onClose, onAddJob }: JobFormProps) {
             disabled={isSubmitting}
             className="text-paper bg-signal focus-visible:ring-signal cursor-pointer rounded-lg px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
-            {isSubmitting ? "Adding..." : "Add"}
+            {initialData
+              ? isSubmitting
+                ? "Editing"
+                : "Edit"
+              : isSubmitting
+                ? "Adding..."
+                : "Add"}
           </button>
         </div>
       </form>

@@ -5,11 +5,17 @@ import KanbanColumn from "./KanbanColumn";
 
 interface KanbanBoardProps {
   jobs: Job[];
-  onMoveJob: (jobId: string, newStatus: JobStatus) => void;
-  onDeleteJob: (jobId: string) => void;
+  onMoveJob: (jobId: string, newStatus: JobStatus) => Promise<void>;
+  onDeleteJob: (jobId: string) => Promise<void>;
+  onCardClick: (job: Job) => void;
 }
 
-function KanbanBoard({ jobs, onMoveJob, onDeleteJob }: KanbanBoardProps) {
+function KanbanBoard({
+  jobs,
+  onMoveJob,
+  onDeleteJob,
+  onCardClick,
+}: KanbanBoardProps) {
   return (
     <DragDropProvider
       onDragEnd={(event) => {
@@ -31,6 +37,7 @@ function KanbanBoard({ jobs, onMoveJob, onDeleteJob }: KanbanBoardProps) {
             label={label}
             jobs={jobs.filter((j) => j.status === value)}
             onDeleteJob={onDeleteJob}
+            onCardClick={onCardClick}
           />
         ))}
       </div>

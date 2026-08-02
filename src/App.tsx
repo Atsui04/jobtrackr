@@ -3,17 +3,26 @@ import JobForm from "./components/JobForm";
 import type { Job, JobStatus, NewJob } from "./types/job";
 import { addJob, deleteJob, getJobs, updateJob } from "./lib/jobs";
 import KanbanBoard from "./components/KanbanBoard";
+import type { ModalState } from "./types/modalState";
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [modal, setModal] = useState<ModalState>({ mode: "closed" });
 
   useEffect(() => {
     getJobs().then(setJobs).catch(console.error);
   }, []);
 
-  function handleClose() {
-    setIsModalOpen((prev) => !prev);
+  function openAddModal() {
+    setModal({ mode: "add" });
+  }
+
+  function openEditModal(job: Job) {
+    setModal({ mode: "edit", job });
+  }
+
+  function closeModal() {
+    setModal({ mode: "closed" });
   }
 
   async function handleAddJob(job: NewJob) {
@@ -29,7 +38,7 @@ function App() {
     );
 
     try {
-      await updateJob(jobId, newStatus);
+      await updateJob(jobId, { status: newStatus });
     } catch (err) {
       setJobs(previousJobs);
       console.error(err);
@@ -51,12 +60,22 @@ function App() {
     }
   }
 
+  async function handleEditJob(
+    jobId: string,
+    updates: Partial<Omit<Job, "id" | "created_at">>
+  ) {
+    await updateJob(jobId, updates);
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, ...updates } : j))
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-7xl flex-col px-4 md:px-8">
       <header className="flex items-center justify-between px-6 py-4">
         <h1 className="font-display text-xl font-semibold">JobTrackr</h1>
         <button
-          onClick={handleClose}
+          onClick={openAddModal}
           className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-4 py-2 font-sans text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           + New Job
@@ -68,9 +87,16 @@ function App() {
           jobs={jobs}
           onMoveJob={handleMoveJob}
           onDeleteJob={handleDeleteJob}
+          onCardClick={openEditModal}
         />
-        {isModalOpen && (
-          <JobForm onClose={handleClose} onAddJob={handleAddJob} />
+        {modal.mode !== "closed" && (
+          <JobForm
+            key={modal.mode === "edit" ? modal.job.id : "new"}
+            onClose={closeModal}
+            onAddJob={handleAddJob}
+            onEditJob={handleEditJob}
+            initialData={modal.mode === "edit" ? modal.job : undefined}
+          />
         )}
       </main>
     </div>
