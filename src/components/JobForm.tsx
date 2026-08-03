@@ -158,7 +158,7 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="text-paper bg-signal focus-visible:ring-signal cursor-pointer rounded-lg px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="bg-signal focus-visible:ring-signal cursor-pointer rounded-lg px-4 py-2 text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {initialData
               ? isSubmitting

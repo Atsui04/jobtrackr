@@ -1,17 +1,43 @@
 import { useEffect, useState } from "react";
-import JobForm from "./components/JobForm";
+
 import type { Job, JobStatus, NewJob } from "./types/job";
-import { addJob, deleteJob, getJobs, updateJob } from "./lib/jobs";
-import KanbanBoard from "./components/KanbanBoard";
+import type { Session } from "@supabase/supabase-js";
 import type { ModalState } from "./types/modalState";
 
+import { addJob, deleteJob, getJobs, updateJob } from "./lib/jobs";
+
+import JobForm from "./components/JobForm";
+import KanbanBoard from "./components/KanbanBoard";
+import { supabase } from "./lib/supabase";
+import LoginForm from "./components/LoginForm";
+import { signOut } from "./lib/auth";
+
 function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
 
   useEffect(() => {
-    getJobs().then(setJobs).catch(console.error);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    getJobs().then(setJobs).catch(console.error);
+  }, [session]);
 
   function openAddModal() {
     setModal({ mode: "add" });
@@ -70,16 +96,35 @@ function App() {
     );
   }
 
+  async function handleSignOut() {
+    try {
+      await signOut();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  if (isLoading) return null;
+  if (!session) return <LoginForm />;
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-7xl flex-col px-4 md:px-8">
       <header className="flex items-center justify-between px-6 py-4">
         <h1 className="font-display text-xl font-semibold">JobTrackr</h1>
-        <button
-          onClick={openAddModal}
-          className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-4 py-2 font-sans text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        >
-          + New Job
-        </button>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={openAddModal}
+            className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-4 py-2 font-sans text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            + New Job
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="text-ink/60 hover:text-ink cursor-pointer px-3 py-2 text-sm"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       <main>
