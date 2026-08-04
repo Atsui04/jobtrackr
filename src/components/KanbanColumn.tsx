@@ -25,7 +25,7 @@ function KanbanColumn({
   return (
     <div
       ref={ref}
-      className="border-ink/10 flex min-w-50 flex-col overflow-hidden rounded-xl border bg-white shadow-sm"
+      className="border-ink/10 flex w-70 shrink-0 flex-col overflow-hidden rounded-xl border bg-white shadow-sm lg:w-full lg:min-w-0"
     >
       <div className={`h-1.5 w-full ${STATUS_STRIPE[status]}`} />
       <div className="flex flex-1 flex-col p-4">
