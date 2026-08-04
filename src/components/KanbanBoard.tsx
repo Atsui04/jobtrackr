@@ -29,7 +29,7 @@ function KanbanBoard({
         onMoveJob(jobId as string, newStatus as JobStatus);
       }}
     >
-      <div className="mt-6 grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-2 md:grid-cols-5">
+      <div className="mt-6 flex w-full flex-nowrap items-start gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-5 lg:overflow-x-visible">
         {STATUSES.map(({ value, label }) => (
           <KanbanColumn
             key={value}

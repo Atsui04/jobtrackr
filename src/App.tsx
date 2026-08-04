@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 
 import type { Job, JobStatus, NewJob } from "./types/job";
-import type { Session } from "@supabase/supabase-js";
 import type { ModalState } from "./types/modalState";
+import type { Session } from "@supabase/supabase-js";
 
+import { supabase } from "./lib/supabase";
 import { addJob, deleteJob, getJobs, updateJob } from "./lib/jobs";
+import { signOut } from "./lib/auth";
+
+import { filterJobs } from "./utils/helpers";
 
 import JobForm from "./components/JobForm";
 import KanbanBoard from "./components/KanbanBoard";
-import { supabase } from "./lib/supabase";
 import LoginForm from "./components/LoginForm";
-import { signOut } from "./lib/auth";
+
+import { Search } from "lucide-react";
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -18,6 +22,9 @@ function App() {
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredJobs = filterJobs(jobs, searchQuery);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -109,9 +116,40 @@ function App() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-7xl flex-col px-4 md:px-8">
-      <header className="flex items-center justify-between px-6 py-4">
-        <h1 className="font-display text-xl font-semibold">JobTrackr</h1>
-        <div className="flex items-center justify-between gap-2">
+      <header className="flex flex-col gap-3 py-4 md:grid md:grid-cols-3 md:items-center">
+        <div className="flex items-center justify-between md:justify-start">
+          <h1 className="font-display text-xl font-semibold">JobTrackr</h1>
+
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={openAddModal}
+              className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-3 py-1.5 font-sans text-sm text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              + New Job
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="text-ink/60 hover:text-ink cursor-pointer rounded-md px-2 py-1.5 text-sm"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search className="text-ink/40 pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 translate-y-[-50%]" />
+            <input
+              className="focus:ring-signal text-ink placeholder:text-ink/40 w-full rounded-xl bg-white py-2 pr-4 pl-10 text-sm transition-all outline-none focus:ring-2"
+              type="text"
+              placeholder="Search company..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="hidden items-center justify-end gap-2 md:flex">
           <button
             onClick={openAddModal}
             className="bg-signal hover:bg-signal/90 focus-visible:ring-signal cursor-pointer rounded-xl px-4 py-2 font-sans text-white transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
@@ -120,7 +158,7 @@ function App() {
           </button>
           <button
             onClick={handleSignOut}
-            className="text-ink/60 hover:text-ink cursor-pointer px-3 py-2 text-sm"
+            className="text-ink/60 hover:text-ink cursor-pointer rounded-md px-3 py-2 text-sm"
           >
             Sign out
           </button>
@@ -129,7 +167,7 @@ function App() {
 
       <main>
         <KanbanBoard
-          jobs={jobs}
+          jobs={filteredJobs}
           onMoveJob={handleMoveJob}
           onDeleteJob={handleDeleteJob}
           onCardClick={openEditModal}
