@@ -19,3 +19,20 @@ body {
   background-color: var(--color-paper);
   color: var(--color-ink);
 }
+
+.app-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title buttons"
+    "search search";
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .app-header {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "title search buttons";
+  }
+}
