@@ -1,37 +1,54 @@
 import { useState, type SubmitEvent } from "react";
 import { signIn } from "../lib/auth";
 import { Eye, EyeOff } from "lucide-react";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function LoginForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const loginScheme = z.object({
+    email: z
+      .string()
+      .min(1, "Email is required")
+      .pipe(z.email("Invalid email address")),
+    password: z.string().min(8, "Password is required"),
+  });
 
-    const formData = new FormData(e.currentTarget);
+  type LoginFormValues = z.infer<typeof loginScheme>;
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginScheme),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
+  async function onSubmit(data: LoginFormValues) {
     try {
-      setIsSubmitting(true);
       setError(null);
-
-      await signIn(email, password);
+      await signIn(data.email, data.password);
     } catch {
       setError("Invalid email or password");
-    } finally {
-      setIsSubmitting(false);
     }
+  }
+
+  async function handleFormSubmit(e: SubmitEvent<HTMLFormElement>) {
+    handleSubmit(onSubmit)(e);
   }
 
   return (
     <div className="bg-paper flex min-h-dvh items-center justify-center">
       <form
         className="text-ink flex w-full max-w-sm flex-col gap-8 rounded-xl border-none bg-white p-10 font-sans"
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
       >
         <h2 className="font-display text-center text-xl font-semibold">
           JobTrackr
@@ -43,11 +60,14 @@ function LoginForm() {
             </label>
             <input
               className="bg-paper focus:ring-signal w-full rounded-lg px-3 py-2 outline-none focus:ring-2"
-              type="email"
+              type="text"
+              id="email"
               placeholder="you@example.com"
-              name="email"
-              required
+              {...register("email")}
             />
+            <span className="text-wine block min-h-4 text-xs font-normal">
+              {errors.email?.message}
+            </span>
           </div>
           <div className="flex flex-col items-start justify-between gap-1 font-light">
             <label className="text-xs" htmlFor="password">
@@ -58,9 +78,9 @@ function LoginForm() {
               <input
                 className="bg-paper focus:ring-signal w-full rounded-lg px-3 py-2 pr-10 outline-none focus:ring-2"
                 type={showPassword ? "text" : "password"}
-                name="password"
+                id="password"
                 placeholder="********"
-                required
+                {...register("password")}
               />
               <button
                 type="button"
@@ -71,6 +91,9 @@ function LoginForm() {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            <span className="text-wine block min-h-4 text-xs font-normal">
+              {errors.password?.message}
+            </span>
           </div>
         </div>
         {error && (
