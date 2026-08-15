@@ -92,3 +92,4 @@ A `jobs` table in Supabase with Row Level Security enabled. Schema:
 | `link`         | `text`, nullable    |
 | `notes`        | `text`, nullable    |
 | `created_at`   | `timestamptz`       |
+| `user_id`      | `uuid`, foreign key |
