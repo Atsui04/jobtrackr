@@ -45,6 +45,7 @@ function JobCard({ job, onDeleteJob, onCardClick }: JobCardProps) {
           target="_blank"
           rel="noreferrer"
           className="text-signal mt-1 max-w-full truncate text-[11px] hover:underline"
+          onClick={(e) => e.stopPropagation()}
         >
           Vacancy link
         </a>

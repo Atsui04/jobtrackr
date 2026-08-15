@@ -33,6 +33,7 @@ type JobFormValues = z.infer<typeof jobSchema>;
 
 function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const mouseDownTargetRef = useRef<EventTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -63,8 +64,15 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
     onClose();
   }
 
+  function handleMouseDown(e: MouseEvent<HTMLDialogElement>) {
+    mouseDownTargetRef.current = e.target;
+  }
+
   function handleBackdropClick(e: MouseEvent<HTMLDialogElement>) {
-    if (e.target === dialogRef.current) {
+    if (
+      e.target === dialogRef.current &&
+      mouseDownTargetRef.current === dialogRef.current
+    ) {
       requestClose();
     }
   }
@@ -104,6 +112,7 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
     <dialog
       ref={dialogRef}
       onClose={handleNativeClose}
+      onMouseDown={handleMouseDown}
       onClick={handleBackdropClick}
       className="fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border-none bg-white p-6 shadow-xl outline-none backdrop:bg-black/50"
     >
