@@ -6,7 +6,12 @@ A kanban-style job application tracker for managing your job search — from app
 
 ![JobTrackr screenshot](./screenshot.png)
 
-**[Live demo →](https://jobtrackr-nip0zc1v0-marks-projects-d14cc920.vercel.app/)**
+**[Live demo →](https://jobtrackr-jade.vercel.app/)**
+
+Use the demo account to explore the board:
+
+- Email: `demo@jobtrackr.app`
+- Password: `demo12345`
 
 ## Features
 
