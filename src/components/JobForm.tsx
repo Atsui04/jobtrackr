@@ -1,8 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import type { SubmitEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type SubmitEvent,
+} from "react";
 import type { Job, NewJob } from "../types/job";
 
 import { X } from "lucide-react";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface JobFormProps {
   onClose: () => void;
@@ -14,16 +22,38 @@ interface JobFormProps {
   initialData?: Job;
 }
 
+const jobSchema = z.object({
+  company: z.string().min(1, "Company is required"),
+  position: z.string().min(1, "Position is required"),
+  link: z.url("Must be a valid URL").optional().or(z.literal("")),
+  notes: z.string().optional(),
+});
+
+type JobFormValues = z.infer<typeof jobSchema>;
+
 function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const companyInputRef = useRef<HTMLInputElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setFocus,
+    formState: { errors, isSubmitting },
+  } = useForm<JobFormValues>({
+    resolver: zodResolver(jobSchema),
+    defaultValues: {
+      company: initialData?.company ?? "",
+      position: initialData?.position ?? "",
+      link: initialData?.link ?? "",
+      notes: initialData?.notes ?? "",
+    },
+  });
 
   useEffect(() => {
     dialogRef.current?.showModal();
-    companyInputRef.current?.focus();
-  }, []);
+    setFocus("company");
+  }, [setFocus]);
 
   function requestClose() {
     dialogRef.current?.close();
@@ -33,19 +63,21 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
     onClose();
   }
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  function handleBackdropClick(e: MouseEvent<HTMLDialogElement>) {
+    if (e.target === dialogRef.current) {
+      requestClose();
+    }
+  }
 
+  async function onSubmit(data: JobFormValues) {
     const values = {
-      company: formData.get("company") as string,
-      position: formData.get("position") as string,
-      link: (formData.get("link") as string) || null,
-      notes: (formData.get("notes") as string) || null,
+      company: data.company,
+      position: data.position,
+      link: data.link || null,
+      notes: data.notes || null,
     };
 
     try {
-      setIsSubmitting(true);
       setError(null);
 
       if (initialData) {
@@ -61,20 +93,22 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
       requestClose();
     } catch {
       setError("Failed to save the job opening. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
+  }
+
+  async function handleFormSubmit(e: SubmitEvent<HTMLFormElement>) {
+    return handleSubmit(onSubmit)(e);
   }
 
   return (
     <dialog
       ref={dialogRef}
       onClose={handleNativeClose}
-      onClick={(e) => e.target === dialogRef.current && requestClose()}
-      className="fixed inset-0 m-auto w-full max-w-md rounded-xl border-none bg-white p-6 shadow-xl outline-none backdrop:bg-black/50"
+      onClick={handleBackdropClick}
+      className="fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border-none bg-white p-6 shadow-xl outline-none backdrop:bg-black/50"
     >
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         className="text-ink flex flex-col gap-4 font-sans"
       >
         <div className="flex items-center justify-between">
@@ -90,62 +124,67 @@ function JobForm({ onClose, onAddJob, onEditJob, initialData }: JobFormProps) {
             <X size={16} aria-hidden />
           </button>
         </div>
+
         <div className="flex flex-col gap-1 font-light">
           <label htmlFor="company" className="text-xs">
             Company *
           </label>
           <input
-            ref={companyInputRef}
-            required
+            {...register("company")}
             type="text"
-            name="company"
             id="company"
             placeholder="Google"
-            defaultValue={initialData?.company}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
+          <span className="text-wine block min-h-4 text-xs">
+            {errors.company?.message}
+          </span>
         </div>
+
         <div className="flex flex-col gap-1">
           <label htmlFor="position" className="text-xs font-light">
             Position *
           </label>
           <input
-            required
+            {...register("position")}
             type="text"
-            name="position"
             id="position"
             placeholder="Frontend developer"
-            defaultValue={initialData?.position}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
+          <span className="text-wine block min-h-4 text-xs">
+            {errors.position?.message}
+          </span>
         </div>
+
         <div className="flex flex-col gap-1">
           <label htmlFor="link" className="text-xs font-light">
             Link
           </label>
           <input
+            {...register("link")}
             type="text"
-            name="link"
             id="link"
             placeholder="https://..."
-            defaultValue={initialData?.link ?? undefined}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           />
+          {errors.link && (
+            <span className="text-wine text-xs">{errors.link.message}</span>
+          )}
         </div>
+
         <div className="flex flex-col gap-1">
           <label htmlFor="notes" className="text-xs font-light">
             Notes
           </label>
           <textarea
-            name="notes"
+            {...register("notes")}
             id="notes"
             placeholder="Recruiter contacts, details..."
-            defaultValue={initialData?.notes ?? undefined}
             className="bg-paper focus:ring-signal rounded-md px-3 py-2 outline-none focus:ring-2"
           ></textarea>
+          {error && <p className="text-wine text-xs">{error}</p>}
         </div>
-
-        {error && <p className="text-wine text-xs">{error}</p>}
 
         <div className="flex items-center justify-end gap-6">
           <button

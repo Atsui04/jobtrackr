@@ -58,14 +58,35 @@ describe("JobForm Component", () => {
       />
     );
 
-    const companyInput = screen.getByLabelText(/company/i);
-    const positionInput = screen.getByLabelText(/position/i);
     const submitButton = screen.getByRole("button", { name: /^add$/i });
 
     await user.click(submitButton);
 
-    expect(companyInput).toBeInvalid();
-    expect(positionInput).toBeInvalid();
+    expect(await screen.findByText(/company is required/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/position is required/i)
+    ).toBeInTheDocument();
+    expect(mockOnAddJob).not.toHaveBeenCalled();
+  });
+
+  it("should show an error if link is invalid", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <JobForm
+        onAddJob={mockOnAddJob}
+        onClose={mockOnClose}
+        onEditJob={mockOnEditJob}
+      />
+    );
+
+    await user.type(screen.getByLabelText(/company/i), "Google");
+    await user.type(screen.getByLabelText(/position/i), "Frontend Developer");
+    await user.type(screen.getByLabelText(/link/i), "wrong");
+
+    await user.click(screen.getByRole("button", { name: /^add$/i }));
+
+    expect(await screen.findByText(/must be a valid url/i)).toBeInTheDocument();
     expect(mockOnAddJob).not.toHaveBeenCalled();
   });
 });
