@@ -18,21 +18,24 @@ Use the demo account to explore the board:
 - Kanban board with 5 statuses: Applied → Screening → Interview → Offer → Rejected
 - Drag-and-drop between columns to update application status
 - Full CRUD: add, edit, and delete job applications
+- Email/password authentication with per-user data isolation (Supabase Auth + Row Level Security)
+- Search and filter jobs by company or position
+- Form validation with react-hook-form and Zod
 - Optimistic UI updates with rollback on network errors
 - Accessibility: full keyboard support, ARIA labels, native `<dialog>` focus trapping
-- Component tests covering the form, card, and column
 - CI pipeline: lint and tests run on every push/PR
 
 ## Tech stack
 
-| Category     | Technology                               |
-| ------------ | ---------------------------------------- |
-| Frontend     | React, TypeScript, Vite                  |
-| Styling      | Tailwind CSS v4                          |
-| Backend / DB | Supabase (Postgres + auto-generated API) |
-| Drag & Drop  | @dnd-kit/react                           |
-| Testing      | Vitest, React Testing Library            |
-| CI           | GitHub Actions                           |
+| Category     | Technology                                    |
+| ------------ | --------------------------------------------- |
+| Frontend     | React, TypeScript, Vite                       |
+| Styling      | Tailwind CSS v4                               |
+| Forms        | React Hook Form, Zod                          |
+| Backend / DB | Supabase (Postgres, Auth, auto-generated API) |
+| Drag & Drop  | @dnd-kit/react                                |
+| Testing      | Vitest, React Testing Library                 |
+| CI           | GitHub Actions                                |
 
 ## Running locally
 
@@ -53,6 +56,8 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm run dev
 ```
 
+Then create your own user via **Supabase Dashboard → Authentication → Users → Add user** (public sign-up is disabled by design — see [Database](#database) below).
+
 ## Testing
 
 ```bash
@@ -65,22 +70,25 @@ npm run test
 src/
   components/
     JobForm.tsx        # add/edit job modal
-    JobCard.tsx         # a single job card on the board
-    KanbanColumn.tsx     # a single status column
-    KanbanBoard.tsx       # dnd context + grouping by status
+    LoginForm.tsx        # sign-in form
+    JobCard.tsx            # a single job card on the board
+    KanbanColumn.tsx         # a single status column
+    KanbanBoard.tsx            # dnd context + grouping by status
   lib/
     supabase.ts          # Supabase client setup
-    jobs.ts               # CRUD functions (getJobs, addJob, updateJob, deleteJob)
+    auth.ts                # sign in / sign out
+    jobs.ts                  # CRUD functions (getJobs, addJob, updateJob, deleteJob)
   types/
     job.ts                 # Job, NewJob, JobStatus types
-    modalState.ts           # ModalState type
+    modalState.ts             # ModalState type
   utils/
     constants.ts            # status list and color tokens
+    helpers.ts                 # search/filter logic
 ```
 
 ## Database
 
-A `jobs` table in Supabase with Row Level Security enabled. Schema:
+A `jobs` table in Supabase with Row Level Security enabled, scoped per user via `auth.uid() = user_id`. Public sign-up is intentionally disabled — new accounts are created manually via the Supabase dashboard. Schema:
 
 | Column         | Type                |
 | -------------- | ------------------- |
